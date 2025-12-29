@@ -17,6 +17,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Default installation directory
@@ -266,9 +267,20 @@ print_success() {
     echo -e "${YELLOW}Next Steps:${NC}"
     echo "  1. Open http://${SERVER_IP}:3000 in your browser"
     echo "  2. Configure AI Models (DeepSeek, OpenAI, etc.)"
-    echo "  3. Configure Exchanges (Binance, Hyperliquid, etc.)"
+    echo "  3. Configure Exchanges (Binance, Hyperliquid, Nado, etc.)"
     echo "  4. Create a Strategy in Strategy Studio"
     echo "  5. Create a Trader and start trading!"
+    echo ""
+    echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗"
+    echo -e "║  🆕 New: Nado DEX Support - Ink Layer2 CLOB Trading          ║"
+    echo -e "╚════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "  ${BLUE}Nado Features:${NC}"
+    echo "  • Unified margin across spot and perpetuals"
+    echo "  • Up to 20x leverage"
+    echo "  • Low fees (1.5 bps taker, maker rebates)"
+    echo "  • Self-custodial DEX trading"
+    echo "  • Get started: https://www.nado.xyz/"
     echo ""
     echo -e "${YELLOW}Note:${NC} If accessing from local machine, use http://127.0.0.1:3000"
     echo ""
