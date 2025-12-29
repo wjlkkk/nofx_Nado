@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 # Get the directory where this script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 INSTALL_DIR="${SCRIPT_DIR}"
-COMPOSE_FILE="docker-compose.prod.yml"
+COMPOSE_FILE="docker-compose.yml"
 
 echo -e "${BLUE}"
 echo "╔════════════════════════════════════════════════════════════╗"
@@ -130,13 +130,9 @@ EOF
 build_images() {
     echo -e "${YELLOW}Building Docker images (this may take a few minutes)...${NC}"
 
-    # Build backend image
-    echo -e "${CYAN}Building backend image...${NC}"
-    $COMPOSE_CMD build --no-cache backend
-
-    # Build frontend image
-    echo -e "${CYAN}Building frontend image...${NC}"
-    $COMPOSE_CMD build --no-cache frontend
+    # Build all services
+    echo -e "${CYAN}Building NOFX services with Nado integration...${NC}"
+    $COMPOSE_CMD build --no-cache
 
     echo -e "${GREEN}✓ Images built${NC}"
 }
