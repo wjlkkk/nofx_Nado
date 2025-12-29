@@ -116,7 +116,7 @@ export interface AIModel {
 
 export interface Exchange {
   id: string                     // UUID (empty for supported exchange templates)
-  exchange_type: string          // "binance", "bybit", "okx", "hyperliquid", "aster", "lighter"
+  exchange_type: string          // "binance", "bybit", "okx", "hyperliquid", "aster", "lighter", "nado"
   account_name: string           // User-defined account name
   name: string                   // Display name
   type: 'cex' | 'dex'
@@ -136,10 +136,12 @@ export interface Exchange {
   lighterPrivateKey?: string
   lighterApiKeyPrivateKey?: string
   lighterApiKeyIndex?: number
+  // NADO specific
+  nadoPrivateKey?: string
 }
 
 export interface CreateExchangeRequest {
-  exchange_type: string          // "binance", "bybit", "okx", "hyperliquid", "aster", "lighter"
+  exchange_type: string          // "binance", "bybit", "okx", "hyperliquid", "aster", "lighter", "nado"
   account_name: string           // User-defined account name
   enabled: boolean
   api_key?: string
@@ -154,6 +156,7 @@ export interface CreateExchangeRequest {
   lighter_private_key?: string
   lighter_api_key_private_key?: string
   lighter_api_key_index?: number
+  nado_private_key?: string
 }
 
 export interface CreateTraderRequest {

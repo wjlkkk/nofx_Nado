@@ -61,6 +61,10 @@ type AutoTraderConfig struct {
 	LighterAPIKeyIndex      int    // LIGHTER API Key index (0-255)
 	LighterTestnet          bool   // Whether to use testnet
 
+	// NADO configuration
+	NadoPrivateKey string // NADO wallet private key
+	NadoTestnet    bool   // Whether to use NADO testnet
+
 	// AI configuration
 	UseQwen     bool
 	DeepSeekKey string
@@ -263,6 +267,18 @@ func NewAutoTrader(config AutoTraderConfig, st *store.Store, userID string) (*Au
 			return nil, fmt.Errorf("failed to initialize LIGHTER trader: %w", err)
 		}
 		logger.Infof("✓ LIGHTER trader initialized successfully")
+	case "nado":
+		logger.Infof("🏦 [%s] Using NADO trading", config.Name)
+
+		if config.NadoPrivateKey == "" {
+			return nil, fmt.Errorf("NADO requires private key")
+		}
+
+		trader, err = NewNadoTrader(config.NadoPrivateKey, config.NadoTestnet)
+		if err != nil {
+			return nil, fmt.Errorf("failed to initialize NADO trader: %w", err)
+		}
+		logger.Infof("✓ NADO trader initialized successfully")
 	default:
 		return nil, fmt.Errorf("unsupported trading platform: %s", config.Exchange)
 	}
@@ -413,6 +429,14 @@ func (at *AutoTrader) Run() error {
 		if binanceTrader, ok := at.trader.(*FuturesTrader); ok && at.store != nil {
 			binanceTrader.StartOrderSync(at.id, at.exchangeID, at.exchange, at.store, 30*time.Second)
 			logger.Infof("🔄 [%s] Binance order+position sync enabled (every 30s)", at.name)
+		}
+	}
+
+	// Start Nado order sync if using Nado exchange
+	if at.exchange == "nado" {
+		if nadoTrader, ok := at.trader.(*NadoTrader); ok && at.store != nil {
+			nadoTrader.StartOrderSync(at.id, at.exchangeID, at.exchange, at.store, 30*time.Second)
+			logger.Infof("🔄 [%s] Nado order+position sync enabled (every 30s)", at.name)
 		}
 	}
 
@@ -1849,7 +1873,7 @@ func (at *AutoTrader) recordAndConfirmOrder(orderResult map[string]interface{}, 
 	// Exchanges with OrderSync: Skip immediate order recording, let OrderSync handle it
 	// This ensures accurate data from GetTrades API and avoids duplicate records
 	switch at.exchange {
-	case "binance", "lighter", "hyperliquid", "bybit", "okx", "bitget", "aster":
+	case "binance", "lighter", "hyperliquid", "bybit", "okx", "bitget", "aster", "nado":
 		logger.Infof("  📝 Order submitted (id: %s), will be synced by OrderSync", orderID)
 		return
 	}

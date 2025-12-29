@@ -1,0 +1,31 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with gradient -->
+  <defs>
+    <linearGradient id="nadoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Circle background -->
+  <circle cx="64" cy="64" r="60" fill="url(#nadoGradient)"/>
+
+  <!-- Nado logo design - stylized "N" with trading chart -->
+  <g transform="translate(32, 36)">
+    <!-- Letter N -->
+    <path d="M0 0 L16 0 L32 28 L32 0 L48 0 L48 56 L32 56 L16 28 L16 56 L0 56 Z"
+          fill="white"/>
+
+    <!-- Trading chart arrow -->
+    <path d="M40 36 L48 28 L56 36 M48 28 L48 48"
+          stroke="#F0B90B"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"/>
+  </g>
+
+  <!-- Decorative elements -->
+  <circle cx="96" cy="32" r="4" fill="#F0B90B" opacity="0.8"/>
+  <circle cx="104" cy="40" r="2" fill="white" opacity="0.6"/>
+</svg>

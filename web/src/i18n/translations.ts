@@ -402,6 +402,7 @@ export const translations = {
     // Exchange names
     hyperliquidExchangeName: 'Hyperliquid',
     asterExchangeName: 'Aster DEX',
+    nadoExchangeName: 'Nado',
 
     // Secure input
     secureInputButton: 'Secure Input',
@@ -1597,6 +1598,7 @@ export const translations = {
     // Exchange names
     hyperliquidExchangeName: 'Hyperliquid',
     asterExchangeName: 'Aster DEX',
+    nadoExchangeName: 'Nado',
 
     // Secure input
     secureInputButton: '安全输入',

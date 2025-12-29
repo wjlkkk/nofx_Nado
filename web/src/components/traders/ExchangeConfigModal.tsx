@@ -25,6 +25,7 @@ const SUPPORTED_EXCHANGE_TEMPLATES = [
   { exchange_type: 'hyperliquid', name: 'Hyperliquid', type: 'dex' as const },
   { exchange_type: 'aster', name: 'Aster DEX', type: 'dex' as const },
   { exchange_type: 'lighter', name: 'Lighter', type: 'dex' as const },
+  { exchange_type: 'nado', name: 'Nado', type: 'dex' as const },
 ]
 
 interface ExchangeConfigModalProps {
@@ -45,7 +46,8 @@ interface ExchangeConfigModalProps {
     lighterWalletAddr?: string,
     lighterPrivateKey?: string,
     lighterApiKeyPrivateKey?: string,
-    lighterApiKeyIndex?: number
+    lighterApiKeyIndex?: number,
+    nadoPrivateKey?: string
   ) => Promise<void>
   onDelete: (exchangeId: string) => void
   onClose: () => void
@@ -92,9 +94,12 @@ export function ExchangeConfigModal({
   const [lighterApiKeyPrivateKey, setLighterApiKeyPrivateKey] = useState('')
   const [lighterApiKeyIndex, setLighterApiKeyIndex] = useState(0)
 
+  // NADO 特定字段
+  const [nadoPrivateKey, setNadoPrivateKey] = useState('')
+
   // 安全输入状态
   const [secureInputTarget, setSecureInputTarget] = useState<
-    null | 'hyperliquid' | 'aster' | 'lighter'
+    null | 'hyperliquid' | 'aster' | 'lighter' | 'nado'
   >(null)
 
   // 保存中状态
@@ -129,6 +134,7 @@ export function ExchangeConfigModal({
     hyperliquid: { url: 'https://app.hyperliquid.xyz/join/AITRADING', hasReferral: true },
     aster: { url: 'https://www.asterdex.com/en/referral/fdfc0e', hasReferral: true },
     lighter: { url: 'https://app.lighter.xyz/?referral=68151432', hasReferral: true },
+    nado: { url: 'https://www.nado.xyz/', hasReferral: false },
   }
 
   // 如果是编辑现有交易所，初始化表单数据
@@ -152,6 +158,9 @@ export function ExchangeConfigModal({
       setLighterWalletAddr(selectedExchange.lighterWalletAddr || '')
       setLighterApiKeyPrivateKey('') // Don't load existing API key for security
       setLighterApiKeyIndex(selectedExchange.lighterApiKeyIndex || 0)
+
+      // NADO 字段
+      setNadoPrivateKey('') // Don't load existing private key for security
     }
   }, [editingExchangeId, selectedExchange])
 
@@ -240,6 +249,10 @@ export function ExchangeConfigModal({
     if (secureInputTarget === 'lighter') {
       setLighterApiKeyPrivateKey(trimmed)
       toast.success(t('lighterApiKeyImported', language))
+    }
+    if (secureInputTarget === 'nado') {
+      setNadoPrivateKey(trimmed)
+      toast.success(language === 'zh' ? 'Nado 私钥已导入' : 'Nado private key imported')
     }
     // 仅在开发环境输出调试信息
     if (import.meta.env.DEV) {
@@ -334,6 +347,26 @@ export function ExchangeConfigModal({
           '', // lighterPrivateKey (L1) no longer needed
           lighterApiKeyPrivateKey.trim(),
           lighterApiKeyIndex
+        )
+      } else if (currentExchangeType === 'nado') {
+        if (!nadoPrivateKey.trim()) return
+        await onSave(
+          exchangeId,
+          exchangeType,
+          trimmedAccountName,
+          '', // apiKey not used for Nado
+          '',
+          '',
+          testnet,
+          undefined, // hyperliquidWalletAddr
+          undefined, // asterUser
+          undefined, // asterSigner
+          undefined, // asterPrivateKey
+          undefined, // lighterWalletAddr
+          undefined, // lighterPrivateKey
+          undefined, // lighterApiKeyPrivateKey
+          undefined, // lighterApiKeyIndex
+          nadoPrivateKey.trim()
         )
       } else {
         // 默认情况（其他CEX交易所）
@@ -1174,6 +1207,100 @@ export function ExchangeConfigModal({
                     </div>
                   </>
                 )}
+
+                {/* NADO configuration */}
+                {currentExchangeType === 'nado' && (
+                  <>
+                    {/* Info banner */}
+                    <div
+                      className="p-3 rounded mb-4"
+                      style={{
+                        background: 'rgba(240, 185, 11, 0.1)',
+                        border: '1px solid rgba(240, 185, 11, 0.3)',
+                      }}
+                    >
+                      <div className="flex items-start gap-2">
+                        <span style={{ color: '#F0B90B', fontSize: '16px' }}>🔐</span>
+                        <div className="flex-1">
+                          <div className="text-sm font-semibold mb-1" style={{ color: '#F0B90B' }}>
+                            {language === 'zh' ? 'Nado DEX 配置' : 'Nado DEX Setup'}
+                          </div>
+                          <div className="text-xs" style={{ color: '#848E9C', lineHeight: '1.5' }}>
+                            {language === 'zh'
+                              ? 'Nado 是建立在 Ink Layer2 上的 CLOB DEX。请输入您的钱包私钥进行交易。'
+                              : 'Nado is a CLOB DEX built on Ink Layer2. Enter your wallet private key to start trading.'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Private Key Input */}
+                    <div className="mb-4">
+                      <label
+                        className="block text-sm font-semibold mb-2"
+                        style={{ color: '#EAECEF' }}
+                      >
+                        {language === 'zh' ? '钱包私钥' : 'Wallet Private Key'} *
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="password"
+                          value={nadoPrivateKey}
+                          onChange={(e) => setNadoPrivateKey(e.target.value)}
+                          placeholder={language === 'zh' ? '0x...' : '0x...'}
+                          className="flex-1 px-3 py-2 rounded"
+                          style={{
+                            background: '#0B0E11',
+                            border: '1px solid #2B3139',
+                            color: '#EAECEF',
+                          }}
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setSecureInputTarget('nado')}
+                          className="px-3 py-2 rounded text-sm font-semibold transition-all hover:scale-105"
+                          style={{
+                            background: 'rgba(14, 203, 129, 0.2)',
+                            color: '#0ECB81',
+                            border: '1px solid rgba(14, 203, 129, 0.3)',
+                          }}
+                        >
+                          {language === 'zh' ? '安全输入' : 'Secure Input'}
+                        </button>
+                      </div>
+                      <div className="text-xs mt-1" style={{ color: '#848E9C' }}>
+                        {language === 'zh'
+                          ? '您的 Ink Layer2 钱包私钥（64 位十六进制字符）。私钥将被加密存储。'
+                          : 'Your Ink Layer2 wallet private key (64 hex characters). The key will be encrypted and stored securely.'}
+                      </div>
+                    </div>
+
+                    {/* Testnet Toggle */}
+                    <div className="mb-4">
+                      <label
+                        className="flex items-center gap-3 cursor-pointer"
+                        style={{ color: '#EAECEF' }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={testnet}
+                          onChange={(e) => setTestnet(e.target.checked)}
+                          className="w-4 h-4 rounded"
+                          style={{ accentColor: '#F0B90B' }}
+                        />
+                        <span className="text-sm font-semibold">
+                          {language === 'zh' ? '使用测试网' : 'Use Testnet'}
+                        </span>
+                      </label>
+                      <div className="text-xs mt-1 ml-7" style={{ color: '#848E9C' }}>
+                        {language === 'zh'
+                          ? '勾选以使用 Nado 测试网进行测试。测试网资产没有实际价值。'
+                          : 'Check to use Nado testnet for testing. Testnet assets have no real value.'}
+                      </div>
+                    </div>
+                  </>
+                )}
               </>
             )}
           </div>
@@ -1214,12 +1341,15 @@ export function ExchangeConfigModal({
                     !asterPrivateKey.trim())) ||
                 (currentExchangeType === 'lighter' &&
                   (!lighterWalletAddr.trim() || !lighterApiKeyPrivateKey.trim())) ||
+                (currentExchangeType === 'nado' &&
+                  !nadoPrivateKey.trim()) ||
                 (currentExchangeType === 'bybit' &&
                   (!apiKey.trim() || !secretKey.trim())) ||
                 (selectedTemplate?.type === 'cex' &&
                   currentExchangeType !== 'hyperliquid' &&
                   currentExchangeType !== 'aster' &&
                   currentExchangeType !== 'lighter' &&
+                  currentExchangeType !== 'nado' &&
                   currentExchangeType !== 'binance' &&
                   currentExchangeType !== 'bybit' &&
                   currentExchangeType !== 'okx' &&
